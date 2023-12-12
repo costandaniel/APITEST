@@ -12,10 +12,12 @@ namespace APITEST.Services.CharacterService
         };
 
         private readonly IMapper _mapper;
+        private readonly DataContext _db;
 
-        public CharacterService(IMapper mapper)
+        public CharacterService(IMapper mapper, DataContext db)
         {
             _mapper = mapper;
+            _db = db;
         }
 
         public async Task<ServiceResponse<List<GetCharacterDto>>> AddCharacter(AddCharacterDto newCharacter)
@@ -28,10 +30,35 @@ namespace APITEST.Services.CharacterService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<List<GetCharacterDto>>> DeleteCharacter(int id)
+        {
+            var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
+            try
+            {
+                var character = characters.FirstOrDefault(c => c.Id == id);
+                if (character == null)
+                {
+                    throw new Exception($"Character with Id '{id}' not found.");
+                }
+                characters.Remove(character);
+
+                serviceResponse.Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
+
+                return serviceResponse;
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Succes = false;
+                serviceResponse.Message = ex.Message;
+            }
+            return serviceResponse;
+        }
+
         public async Task<ServiceResponse<List<GetCharacterDto>>> GetAllCharacters()
         {
             var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
-            serviceResponse.Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
+            var charactersDb = await _db.Characters.ToListAsync();
+            serviceResponse.Data = charactersDb.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
             return serviceResponse;
         }
 
@@ -49,10 +76,12 @@ namespace APITEST.Services.CharacterService
             try
             {
                 var character = characters.FirstOrDefault(c => c.Id == updatedCharacter.Id);
-                if(character == null)
+                if (character == null)
                 {
                     throw new Exception($"Character with Id '{updatedCharacter.Id}' not found.");
                 }
+                _mapper.Map<Character>(updatedCharacter);
+
                 character.Name = updatedCharacter.Name;
                 character.HitPoints = updatedCharacter.HitPoints;
                 character.Strength = updatedCharacter.Strength;
@@ -63,8 +92,8 @@ namespace APITEST.Services.CharacterService
                 serviceResponse.Data = _mapper.Map<GetCharacterDto>(character);
 
                 return serviceResponse;
-
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;

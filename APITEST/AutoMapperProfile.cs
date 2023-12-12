@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using APITEST.Dtos.Character;
+using AutoMapper;
 
 namespace APITEST
 {
@@ -8,6 +9,7 @@ namespace APITEST
         {
             CreateMap<Character, GetCharacterDto>();
             CreateMap<AddCharacterDto, Character>();
+            CreateMap<UpdateCharacterDto, Character>();
         }
     }
 }

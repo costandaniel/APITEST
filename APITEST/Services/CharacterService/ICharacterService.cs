@@ -1,4 +1,6 @@
-﻿namespace APITEST.Services.CharacterService
+﻿using System.Threading.Tasks;
+
+namespace APITEST.Services.CharacterService
 {
     public interface ICharacterService
     {
@@ -9,5 +11,7 @@
         Task<ServiceResponse<List<GetCharacterDto>>> AddCharacter(AddCharacterDto character);
 
         Task<ServiceResponse<GetCharacterDto>> UpdateCharacter(UpdateCharacterDto character);
+
+        Task<ServiceResponse<List<GetCharacterDto>>> DeleteCharacter(int id);
     }
 }
